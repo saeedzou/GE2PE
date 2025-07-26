@@ -80,7 +80,7 @@ class GE2PE():
         """
         
         output_list = []
-        input_list = [self.norma.normalize(text).replace('ك', 'ک') for text in input_list]
+        input_list = [self.norma.normalize(text) for text in input_list]
         input = input_list
         input_list = [text.replace('ِ', '').replace('ُ', '').replace('َ', '') for text in input_list]
         for i in range(0,len(input_list),batch_size):
@@ -102,7 +102,7 @@ class GE2PE():
             for i in range(len(input_list)):
                 output_list[i] = self.rules(input[i], output_list[i])
 
-        output_list = [i.strip() for i in output_list]
+        output_list = [i.strip().replace("1", "") for i in output_list]
         return output_list
 
     def generate_with_punctuation(self, input_list, batch_size=10, use_rules=False, use_dict=False):
