@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, T5ForConditionalGeneration
-from Parsivar.normalizer import Normalizer
+from normalizer import Normalizer
 
 class GE2PE():
 
