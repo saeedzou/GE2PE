@@ -1,4 +1,5 @@
 from transformers import AutoTokenizer, T5ForConditionalGeneration
+import re
 from normalizer import Normalizer
 
 class GE2PE():
@@ -103,3 +104,54 @@ class GE2PE():
 
         output_list = [i.strip() for i in output_list]
         return output_list
+
+    def generate_with_punctuation(self, input_list, batch_size=10, use_rules=False, use_dict=False):
+        """
+        Generates phonemes for sentences containing punctuation.
+        Splits sentences by punctuation, generates phonemes for each part, and then joins them.
+        input_list: list of sentences or a single sentence string.
+        batch_size: inference batch_size
+        use_rules: boolean indicating the use of rules to apply short vowels.
+        use_dict: boolean indicating the use of self-defined dictionary.
+        returns the list of phonemized sentences.
+        """
+        if isinstance(input_list, str):
+            input_list = [input_list]
+
+        puncts = ".!؟،:"
+        
+        all_segments = []
+        sentence_structures = []
+        
+        for text in input_list:
+            # Split by punctuation and keep the delimiters
+            parts = [p.strip() for p in re.split(f'([{puncts}])', text) if p.strip()]
+            sentence_structures.append(parts)
+            
+            # Collect only the text parts for the model
+            for part in parts:
+                if part not in puncts:
+                    all_segments.append(part)
+
+        # Generate phonemes for all text segments at once
+        if all_segments:
+            phonemized_segments = self.generate(all_segments, batch_size, use_rules, use_dict)
+        else:
+            phonemized_segments = []
+
+        result_list = []
+        phoneme_idx = 0
+        for structure in sentence_structures:
+            result_sentence = ""
+            for part in structure:
+                if part in puncts:
+                    # For punctuation, remove preceding space, then add the punctuation and a space.
+                    result_sentence = result_sentence.strip() + part + " "
+                else:
+                    # For text, add the phonemized part and a space.
+                    if phoneme_idx < len(phonemized_segments):
+                        result_sentence += phonemized_segments[phoneme_idx] + " "
+                        phoneme_idx += 1
+            result_list.append(result_sentence.strip())
+            
+        return result_list
