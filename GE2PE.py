@@ -16,7 +16,7 @@ class GE2PE():
             self.model = self.model.cuda()
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.dictionary = dictionary
-        self.norma = Normalizer(pinglish_conversion_needed=True)
+        self.norma = Normalizer()
     
     def is_vowel(self, char):
         return (char in ['a', '/', 'i', 'e', 'u', 'o'])
